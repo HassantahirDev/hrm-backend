@@ -5,6 +5,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { AppService } from './app.service';
+import { WorkLogModule } from './worklog/worklog.module';
 
 
 
@@ -13,6 +14,7 @@ import { AppService } from './app.service';
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuthModule,
+    WorkLogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

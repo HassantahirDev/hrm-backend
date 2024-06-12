@@ -14,11 +14,11 @@ datasource db {
 }
 
 model User {
-  userId       String  @id @default(uuid())
+  userId       String    @id @default(uuid())
   username     String?
-  email_mobile String  @unique
+  email_mobile String    @unique
   name         String
-  password String
+  password     String
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now())
   deleted      Boolean   @default(false)
@@ -26,4 +26,16 @@ model User {
   isVerified   Boolean   @default(true)
   otpCode      String?
   otpCreatedAt DateTime? @default(now())
+  workLogs     WorkLog[]
+}
+
+model WorkLog {
+  userId       String
+  user         User      @relation(fields: [userId], references: [userId])
+  id           String    @id @default(uuid())
+  checkinTime  DateTime
+  checkoutTime DateTime?
+  workingTime  Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }

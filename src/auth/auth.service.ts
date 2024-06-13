@@ -105,6 +105,7 @@ export class AuthService {
         user.userId,
         user.email_mobile,
         this.configService.get('JWT_EXPIRY_TIME'),
+        userData.userType
       );
 
       return { data: userData, token: token };
@@ -123,12 +124,15 @@ export class AuthService {
       }
     }
   }
-
-  async generateToken(id: string, email_mobile: string, time: string) {
+ 
+  async generateToken(id: string, email_mobile: string, time: string, role:string) {
     const payload = {
       userId: id,
       email_mobile: email_mobile,
+      role: role
     };
+
+    console.log('payload', payload)
 
     const jwt_secret = this.configService.get('JWT_SECRET');
     const jwt_expiryTime = time;

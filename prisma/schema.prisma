@@ -13,20 +13,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserType {
+  Admin
+  Employee
+}
+
 model User {
-  userId       String    @id @default(uuid())
+  userId       String      @id @default(uuid())
+  userType     UserType    @default(Employee)
   username     String?
-  email_mobile String    @unique
+  email_mobile String      @unique
   name         String
   password     String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @default(now())
-  deleted      Boolean   @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now())
+  deleted      Boolean     @default(false)
   verifyToken  String?
-  isVerified   Boolean   @default(true)
+  isVerified   Boolean     @default(true)
   otpCode      String?
-  otpCreatedAt DateTime? @default(now())
+  otpCreatedAt DateTime?   @default(now())
   workLogs     WorkLog[]
+  department   Department? @relation(fields: [departmentId], references: [id])
+  departmentId String?
+}
+
+model Department {
+  id             String   @id @default(uuid())
+  departmentName String
+  teamLeader     String
+  users          User[]   
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model WorkLog {

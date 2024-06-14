@@ -293,6 +293,27 @@ export class WorkLogService {
     }));
   }
 
+  async getWorkLogsByUser(userId: string) {
+
+    const workLogs = await this.prisma.workLog.findMany({
+      where: {
+        userId: userId
+      },
+      include: {
+        user: {
+          include:{
+            department: true,
+          }
+        },
+      },
+    });
+
+    return workLogs.map((workLog) => ({
+      ...workLog,
+      formattedWorkingTime: this.formatWorkingTime(workLog.workingTime),
+    }));
+  }
+
   async getWorkLogsByUserId(userId: string) {
     return this.prisma.workLog.findMany({
       where: {

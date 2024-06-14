@@ -36,10 +36,16 @@ export class WorkLogController {
   }
 
   @UseGuards(JwtGuard)
-  @Get('by-user/:userId')
-  async getWorkLogsByUserId(@Param('userId') userId: string) {
-    return this.workLogService.getWorkLogsByUserId(userId);
+  @Get('by-user')
+  async getWorkLogsByUsER(@Req() req) {
+    return this.workLogService.getWorkLogsByUser(req.user.userId);
   }
+
+  // @UseGuards(JwtGuard)
+  // @Get('by-user/:userId')
+  // async getWorkLogsByUserId(@Param('userId') userId: string) {
+  //   return this.workLogService.getWorkLogsByUserId(userId);
+  // }
 
   @Get('by-name/:name')
   async getWorkLogsByUsername(@Param('name') username: string) {
@@ -59,6 +65,13 @@ export class WorkLogController {
   @Get('by-date/excel')
   async exportWorkLogsForDate(@Query('date') date: string) {
     const filePath = await this.workLogService.exportWorkLogsForDateExcel(date);
+    return filePath;
+  }
+
+  @Get('by-team-lead/excel')
+  async exportWorkLogsForTeamLeader(@Query('teamLeader') teamLeader: string) {
+    const filePath =
+      await this.workLogService.exportWorkLogsForTeamLeader(teamLeader);
     return filePath;
   }
 }

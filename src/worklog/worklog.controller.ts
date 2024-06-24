@@ -32,6 +32,12 @@ export class WorkLogController {
     return this.workLogService.updateCheckoutTime(req.user.userId, id);
   }
 
+
+  @Get('all')
+  async getAllWorkLogs() {
+    return this.workLogService.getAllWorkLogs();
+  }
+
   @UseGuards(JwtGuard)
   @Get('by-date')
   async getWorkLogsByDate(@Query('date') date: string) {

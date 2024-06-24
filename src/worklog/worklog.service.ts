@@ -347,6 +347,19 @@ export class WorkLogService {
     });
   }
 
+
+  async getAllWorkLogs() {
+    return this.prisma.workLog.findMany({
+      include: {
+        user: {
+          include:{
+            department:true,
+          }
+        },
+      },
+    });
+  }
+
   async getWorkLogsByName(name: string) {
     const userName = name;
     console.log(userName);
@@ -532,7 +545,7 @@ export class WorkLogService {
     }
   
     await newWorkbook.xlsx.writeFile(newFilePath);
-  
+    console.log(newFilePath)
     return newFilePath;
   }
   

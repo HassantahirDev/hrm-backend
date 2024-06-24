@@ -2,6 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as ExcelJS from 'exceljs';
 import * as fs from 'fs';
+import { TeamMemberDTO } from './dto/create-work-log.dto';
 
 @Injectable()
 export class WorkLogService {
@@ -314,6 +315,27 @@ export class WorkLogService {
     }));
   }
 
+  async getWorkLogsOfTeamMembers(teamMemberDTO: TeamMemberDTO) {
+
+    const workLogs = await this.prisma.workLog.findMany({
+      where: {
+        userId: teamMemberDTO.userId
+      },
+      include: {
+        user: {
+          include:{
+            department: true,
+          }
+        },
+      },
+    });
+
+    return workLogs.map((workLog) => ({
+      ...workLog,
+      formattedWorkingTime: this.formatWorkingTime(workLog.workingTime),
+    }));
+  }
+
   async getWorkLogsByUserId(userId: string) {
     return this.prisma.workLog.findMany({
       where: {
@@ -449,27 +471,34 @@ export class WorkLogService {
     return newFilePath;
   }
 
-  async exportWorkLogsForTeamLeader(teamLeader: string): Promise<string> {
+  async exportWorkLogsForTeamLeader(teamLeader: string, date?: string): Promise<string> {
+    console.log(teamLeader, date);
     const workbook = new ExcelJS.Workbook();
-
+  
     if (!fs.existsSync(this.filePath)) {
       throw new Error('Worklog file does not exist');
     }
-
+  
     await workbook.xlsx.readFile(this.filePath);
     const sheet = workbook.getWorksheet('WorkLogs');
-
+  
     const filteredRows = sheet.getRows(2, sheet.rowCount - 1).filter(row => {
-      return row.getCell(7).value === teamLeader;
+      const isLeaderMatch = row.getCell(3).value === teamLeader; // Assuming 'Team Leader' is in the 8th column
+      if (date) {
+        const checkinDate = new Date(row.getCell(4).value as string); // Assuming 'Checkin Date' is in the 4th column
+        const isDateMatch = checkinDate.toISOString().split('T')[0] === date;
+        return isLeaderMatch && isDateMatch;
+      }
+      return isLeaderMatch;
     });
-
+  
     if (filteredRows.length === 0) {
-      throw new Error('No worklogs found for the specified team leader');
+      throw new Error('No worklogs found for the specified team leader and date');
     }
-
+  
     const newWorkbook = new ExcelJS.Workbook();
     const newSheet = newWorkbook.addWorksheet('WorkLogs');
-
+  
     newSheet.addRow([
       'WorkLogId',
       'UserId',
@@ -481,7 +510,7 @@ export class WorkLogService {
       'Team Leader',
       'Department Name',
     ]);
-
+  
     filteredRows.forEach(row => {
       const rowValues = row.values as Array<any>;
       const cellValues = rowValues.map(cell => {
@@ -494,16 +523,17 @@ export class WorkLogService {
       });
       newSheet.addRow(cellValues);
     });
-
-    const newFilePath = `worklogs_${teamLeader}.xlsx`;
-
+  
+    const newFilePath = `worklogs_${teamLeader}_${date || 'all'}.xlsx`;
+  
     // Delete the old file if it exists
     if (fs.existsSync(newFilePath)) {
       fs.unlinkSync(newFilePath);
     }
-
+  
     await newWorkbook.xlsx.writeFile(newFilePath);
-
+  
     return newFilePath;
   }
+  
 }

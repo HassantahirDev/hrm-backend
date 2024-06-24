@@ -5,3 +5,10 @@ export class CreateWorkLogDto {
   @IsString()
   userId: string;
 }
+
+export class TeamMemberDTO {
+  @IsNotEmpty()
+  @IsString()
+  userId: string;
+}
+

@@ -10,8 +10,11 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
+import * as fs from 'fs';
 import { WorkLogService } from './worklog.service';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { TeamMemberDTO } from './dto/create-work-log.dto';
+import { Response } from 'express';
 
 @Controller('work-log')
 export class WorkLogController {
@@ -41,6 +44,14 @@ export class WorkLogController {
     return this.workLogService.getWorkLogsByUser(req.user.userId);
   }
 
+  @UseGuards(JwtGuard)
+  @Post('team-member')
+  async getWorkLogsByTeamMember(@Body() req: TeamMemberDTO) {
+    return this.workLogService.getWorkLogsOfTeamMembers(req);
+  }
+
+  
+
   // @UseGuards(JwtGuard)
   // @Get('by-user/:userId')
   // async getWorkLogsByUserId(@Param('userId') userId: string) {
@@ -68,10 +79,27 @@ export class WorkLogController {
     return filePath;
   }
 
-  @Get('by-team-lead/excel')
-  async exportWorkLogsForTeamLeader(@Query('teamLeader') teamLeader: string) {
-    const filePath =
-      await this.workLogService.exportWorkLogsForTeamLeader(teamLeader);
-    return filePath;
-  }
+  @Get('by-team-lead/excel/:teamLeader/:date?')
+async exportWorkLogsForTeamLeader(
+  @Param('teamLeader') teamLeader: string,
+  @Param('date') date: string,
+  @Res() res: Response,
+) {
+  const filePath = await this.workLogService.exportWorkLogsForTeamLeader(teamLeader, date);
+  res.download(filePath, (err) => {
+    if (err) {
+      console.error('Error downloading file:', err);
+      res.status(500).send('Error downloading file');
+    } else {
+      // Optionally delete the file after sending it to the client
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error('Error deleting file:', err);
+        }
+      });
+    }
+  });
+  return filePath;
+}
+
 }

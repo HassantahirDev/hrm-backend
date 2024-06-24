@@ -54,3 +54,9 @@ export class LogInDto {
      )
   password: string;
 }
+
+export class TeamDTO{
+  @IsNotEmpty()
+  @IsString()
+  departmentId: string
+}

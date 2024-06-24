@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LogInDto } from './dto/login.dto';
+import { LogInDto, TeamDTO } from './dto/login.dto';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -145,5 +145,27 @@ export class AuthService {
     return {
       access_token: token,
     };
+  }
+
+  async getTeam(teamDto: TeamDTO){
+    console.log(teamDto)
+    const team = await this.prismaService.user.findMany({
+      where:{
+        departmentId:teamDto.departmentId,
+      }
+    })
+
+    return team;
+  }
+
+  async getUser(userId: string){
+    console.log(userId)
+    const team = await this.prismaService.user.findFirst({
+      where:{
+        userId:userId,
+      }
+    })
+
+    return team;
   }
 }

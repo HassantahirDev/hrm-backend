@@ -97,7 +97,6 @@ async exportWorkLogsForTeamLeader(
       console.error('Error downloading file:', err);
       res.status(500).send('Error downloading file');
     } else {
-      // Optionally delete the file after sending it to the client
       fs.unlink(filePath, (err) => {
         if (err) {
           console.error('Error deleting file:', err);

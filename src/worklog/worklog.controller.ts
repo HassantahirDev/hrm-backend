@@ -108,4 +108,24 @@ async exportWorkLogsForTeamLeader(
   return filePath;
 }
 
+@Get('export/all')
+async exportAllWorkLogs(
+  @Res() res: Response,
+) {
+  const filePath = 'worklogs.xlsx'
+  res.download(filePath, (err) => {
+    if (err) {
+      console.error('Error downloading file:', err);
+      res.status(500).send('Error downloading file');
+    } else {
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error('Error deleting file:', err);
+        }
+      });
+    }
+  });
+  return filePath;
+}
+
 }

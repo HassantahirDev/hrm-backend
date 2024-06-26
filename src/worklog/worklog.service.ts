@@ -8,6 +8,36 @@ import { TeamMemberDTO } from './dto/create-work-log.dto';
 export class WorkLogService {
   constructor(private prisma: PrismaService) {}
 
+
+  async createDailyWorkLogs() {
+    try {
+      // Fetch all users with userType 'Employee'
+      const employees = await this.prisma.user.findMany({
+        where: { userType: 'Employee', deleted: false },
+      });
+  
+  
+      // Create a work log for each employee
+      for (const employee of employees) {
+        var records = await this.prisma.workLog.create({
+          data: {
+            userId: employee.userId,
+            checkinTime: null,
+            checkoutTime: null,
+            workingTime: 0,
+          },
+        });
+      }
+
+      return records;
+  
+      console.log('Daily work logs created for employees');
+    } catch (error) {
+      console.error('Error creating daily work logs:', error);
+    }
+  }
+  
+
   async createWorkLog(userId: string) {
     const checkinTime = this.convertToPKT(new Date());
     const startOfDay = new Date(checkinTime);

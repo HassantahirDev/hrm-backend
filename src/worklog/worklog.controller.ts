@@ -20,6 +20,11 @@ import { Response } from 'express';
 export class WorkLogController {
   constructor(private readonly workLogService: WorkLogService) {}
 
+  @Get('daily')
+  async createDailyWorklog() {
+    return this.workLogService.createDailyWorkLogs();
+  }
+
   @UseGuards(JwtGuard)
   @Get('checkin')
   async checkin(@Req() req) {

@@ -11,10 +11,14 @@ export class WorkLogService {
 
   async createDailyWorkLogs() {
     try {
+
+      const checkinTime = this.convertToPKT(new Date());
       // Fetch all users with userType 'Employee'
       const employees = await this.prisma.user.findMany({
         where: { userType: 'Employee', deleted: false },
       });
+
+      console.log('employees', employees)
   
   
       // Create a work log for each employee
@@ -22,13 +26,14 @@ export class WorkLogService {
         var records = await this.prisma.workLog.create({
           data: {
             userId: employee.userId,
-            checkinTime: null,
+            checkinTime: checkinTime,
             checkoutTime: null,
             workingTime: 0,
           },
         });
       }
 
+      console.log('Daily work logs created for employees');
       return records;
   
       console.log('Daily work logs created for employees');
@@ -314,7 +319,9 @@ export class WorkLogService {
         },
       },
       include: {
-        user: true,
+        user: {include:{
+          department:true,
+        }},
       },
     });
 

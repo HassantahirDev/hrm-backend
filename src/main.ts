@@ -1,14 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.enableCors({
-    origin: 'http://localhost:3000',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
-  const PORT = process.env.PORT || 3000; // Use the port provided by Heroku or default to 3000
-  await app.listen(PORT);
+  const app = await NestFactory.create(AppModule, { cors: true });
+  const configService = app.get(ConfigService);
+  const corsOptions = {
+    origin: '*',
+    methods: '*',
+  };
+  app.enableCors(corsOptions);
+
+  await app.listen(Number(configService.get('PORT')) || 3001);
 }
-bootstrap(); 
+bootstrap();
